@@ -22,6 +22,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
                  ):
         super().__init__()
 
+        self._learn_policy_std = kwargs.get('learn_policy_std', False)  # Default to False
         if self._discrete:
             self._logits_na = ptu.build_mlp(input_size=self._ob_dim,
                                            output_size=self._ac_dim,
@@ -82,9 +83,17 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 
     # query the policy with observation(s) to get selected action(s)
     def get_action(self, obs: np.ndarray) -> np.ndarray:
-        # TODO: 
         ## Provide the logic to produce an action from the policy
-        pass
+
+        if obs.ndim == 1:
+            obs = np.expand_dims(obs, axis=0)
+    
+        actions = []
+        for observation in obs:
+            observation_tensor = torch.tensor(observation, dtype=torch.float32).to(ptu.device)
+            action = self.forward(observation_tensor)
+            actions.append(action.detach().cpu().numpy()) 
+        return np.array(actions)  
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
@@ -97,17 +106,21 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     # `torch.distributions.Distribution` object. It's up to you!
     def forward(self, observation: torch.FloatTensor):
         if self._discrete:
+            # Corrige
             logits = self._logits_na(observation)
             action_distribution = distributions.Categorical(logits=logits)
             return action_distribution
         else:
+            if isinstance(observation, np.ndarray):
+                observation = torch.tensor(observation, dtype=torch.float32).to(ptu.device)
             if self._deterministic:
                 ##  TODO output for a deterministic policy
-                action_distribution = TODO
-            else:
-                
+                action_distribution = self._mean_net(observation)
+            else:    
                 ##  TODO output for a stochastic policy
-                action_distribution = TODO
+                mean = self._mean_net(observation)
+                std = self._std.exp() # corriger
+                action_distribution = distributions.Normal(mean, std).rsample()
         return action_distribution
     ##################################
 
@@ -137,7 +150,18 @@ class MLPPolicySL(MLPPolicy):
         ):
         
         # TODO: update the policy and return the loss
-        loss = TODO
+        pred_actions = [self.forward(observation) for observation in observations ]
+        pred_actions = torch.stack(pred_actions)
+        actions = torch.tensor(actions, dtype=torch.float32)
+        loss = self._loss(pred_actions,actions)
+        assert pred_actions.shape == actions.shape, f"Shape mismatch: {pred_actions.shape} vs {actions.shape}"
+        self._optimizer.zero_grad()
+        loss.backward()
+        self._optimizer.step()
+        #print(f"pred_actions shape: {observations.shape}")
+        #print(f"pred_actions shape: {pred_actions.shape}")
+        #print(f"actions shape: {actions.shape}")
+
         return {
             'Training Loss': ptu.to_numpy(loss),
         }
