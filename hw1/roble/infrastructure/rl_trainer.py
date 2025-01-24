@@ -236,17 +236,16 @@ class RL_Trainer(object):
         # HINT1: use sample_trajectories from utils
         # HINT2: you want each of these collected rollouts to be of length self.params['ep_len']
 
-    # Check if we should load initial expert data or collect new data from the policy
+
         print("\nCollecting data to be used for training...",itr)
         if itr == 0:
             # Load the expert data from the given path
-            print("Loading expert data for the first iteration...")
+            print("Loading expert data...")
             with open(load_initial_expertdata, 'rb') as f:
                 loaded_paths = pickle.loads(f.read())
             return loaded_paths, 0, None 
 
         else:
-            # Collect `batch_size` transitions using the current policy
             print(f"Collecting {batch_size} transitions using the current policy...")
 
             # Sample rollouts using `sample_trajectories` from utils
@@ -258,7 +257,7 @@ class RL_Trainer(object):
                 max_path_length=self.params['ep_len']
             )
 
-            # Collect videos if logging is enabled
+            # Collecting videos in the case when logging is enabled
             train_video_paths = None
             if self._log_video:
                 print('\nCollecting train rollouts for saving videos...')
@@ -267,7 +266,7 @@ class RL_Trainer(object):
                     collect_policy,
                     MAX_NVIDEO,
                     MAX_VIDEO_LEN,
-                    render=True  # Save video for TensorBoard visualization
+                    render=True 
                 )
 
             return paths, envsteps_this_batch, train_video_paths
@@ -362,6 +361,7 @@ class RL_Trainer(object):
             logs.update(last_log)
             logs["reward"] = [path["reward"] for path in paths]
             logs["eval_reward"] = [path["reward"] for path in eval_paths]
+            #Corrige
             #for key in paths[0]["infos"][0]:
                 #logs[str(key)] = [info[key] for path in paths for info in path["infos"]]
                 # logs[str(key)] = [value[key] for value in logs[str(key)]]

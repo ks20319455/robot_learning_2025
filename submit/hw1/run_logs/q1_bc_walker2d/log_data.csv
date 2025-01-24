@@ -1,0 +1,2 @@
+train_ep_lens_Average,train_ep_lens_Std,eval_ep_lens_Average,eval_ep_lens_Std,train_returns_Average,train_returns_Std,eval_returns_Average,eval_returns_Std,Train_EnvstepsSoFar,TimeSinceStart,Training Loss,reward_Average,reward_Std,eval_reward_Average,eval_reward_Std,Initial_DataCollection_AverageReturn,step
+1000.0,0.0,118.22222222222223,14.778195482818429,5566.8457,9.237549,276.52957,49.831547,0,14.956340312957764,0.023542171,5.566846,2.0512033,2.3390658,1.3246801,5566.8457,0

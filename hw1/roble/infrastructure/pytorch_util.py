@@ -59,13 +59,6 @@ def build_mlp(
         output_activation = _str_to_activation[params["output_activation"]]
         if output_activation is not None:
             layers.append(output_activation)
-    # Print debug information
-    # print("Model architecture:")
-    # for idx, layer in enumerate(layers):
-    #     if isinstance(layer, nn.Linear):
-    #         print(f"Layer {idx}: Linear (in_features={layer.in_features}, out_features={layer.out_features})")
-    #     elif isinstance(layer, nn.Module):
-    #         print(f"Layer {idx}: {layer.__class__.__name__}")
     # return a MLP. This should be an instance of nn.Module
     # Note: nn.Sequential is an instance of nn.Module.
     return nn.Sequential(*layers)

@@ -80,6 +80,8 @@ def my_app(cfg: DictConfig):
     with open_dict(cfg):
         cfg.logging.logdir = logdir
         cfg.logging.exp_name = exp_name
+    
+    #print(cfg.logging.logdir)
     if not(os.path.exists(logdir)):
         os.makedirs(logdir)
 
